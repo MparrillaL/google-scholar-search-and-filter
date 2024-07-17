@@ -1,63 +1,66 @@
-import os
 import pandas as pd
+import openpyxl
 from serpapi import GoogleSearch
-from datetime import datetime
+import datetime
 
-# Configure your SerpAPI key
-API_KEY = 'your_serpapi_api_key'
-
-# Function to perform the search using SerpAPI and save results to Excel
-def search_and_save_excel(query, file_name):
-    # Set up the search parameters
-    search = GoogleSearch({
-        'q': query,
-        'api_key': API_KEY,
-        'output': 'json'
-    })
-
-    # Perform the search and get results as a dictionary
+# Function to perform a Google Scholar search using SerpApi and save results to an Excel file
+def search_and_save_to_excel(api_key, query, file_name):
+    # Define search parameters
+    params = {
+        "engine": "google_scholar",
+        "q": query,
+        "api_key": api_key
+    }
+    
+    # Perform the search
+    search = GoogleSearch(params)
     results = search.get_dict()
 
-    # Extract relevant data from the search results
-    data = []
-    for result in results.get('organic_results', []):
-        title = result.get('title')
-        link = result.get('link')
-        snippet = result.get('snippet')
-        data.append({'Title': title, 'Link': link, 'Snippet': snippet})
+    # Convert results to a DataFrame
+    df = pd.json_normalize(results['organic_results'])
+    
+    # Save results to an Excel file
+    df.to_excel(f'{file_name}.xlsx', index=False)
+    print(f"Results saved to {file_name}.xlsx")
 
-    # Convert the data to a Pandas DataFrame
-    df = pd.DataFrame(data)
-
-    # Save the DataFrame to an Excel file
-    excel_file = f'{file_name}.xlsx'
-    df.to_excel(excel_file, index=False)
-    print(f'Results saved to {excel_file}')
-
-# Function to load the Excel file, filter data by topic, and save filtered results
-def filter_excel_by_topic(file_name, topic, filtered_file_name):
-    # Load the Excel file into a DataFrame
-    df = pd.read_excel(file_name)
-
-    # Filter the DataFrame by the topic
-    filtered_df = df[df['Snippet'].str.contains(topic, case=False, na=False)]
-
+# Function to filter an Excel file by a specific topic and save the filtered results to a new Excel file
+def filter_excel_by_topic(input_file, topic, output_file):
+    # Read the Excel file
+    df = pd.read_excel(input_file)
+    
+    # Print the columns of the DataFrame to verify which columns are present
+    print("Columns in the DataFrame:", df.columns)
+    
+    # Check if the 'Snippet' column exists and filter by topic
+    if 'Snippet' in df.columns:
+        filtered_df = df[df['Snippet'].str.contains(topic, case=False, na=False)]
+    # If 'Snippet' column does not exist, check for 'title' column (adjust as needed)
+    elif 'Description' in df.columns:
+        filtered_df = df[df['title'].str.contains(topic, case=False, na=False)]
+    else:
+        print("Neither 'Snippet' nor 'title' column found.")
+        return
+    
     # Save the filtered DataFrame to a new Excel file
-    filtered_excel_file = f'{filtered_file_name}.xlsx'
-    filtered_df.to_excel(filtered_excel_file, index=False)
-    print(f'Filtered results saved to {filtered_excel_file}')
+    filtered_df.to_excel(output_file, index=False)
+    print(f"Filtered results saved to {output_file}")
 
-if __name__ == '__main__':
-    # Define your search query and file name
-    query = 'Machine Learning applications in healthcare'
-    file_name = f'serpapi_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
+if __name__ == "__main__":
+    # Replace with your actual SerpApi key
+    api_key = "your_api_key_here"
+    
+    # Define the search query and the topic to filter by
+    query = "machine learning"
+    topic = "deep learning"
+    
+    # Generate a unique file name based on the current date and time
+    file_name = f"serpapi_results_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    
+    # Define the file name for the filtered results
+    filtered_file_name = "filtered_results.xlsx"
 
-    # Call the function to search and save to Excel
-    search_and_save_excel(query, file_name)
-
-    # Define the topic to filter by and the filtered file name
-    topic = 'healthcare'
-    filtered_file_name = f'filtered_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
-
-    # Call the function to load, filter, and save the filtered Excel
+    # Perform the search and save results to an Excel file
+    search_and_save_to_excel(api_key, query, file_name)
+    
+    # Filter the Excel file by topic and save the filtered results to a new Excel file
     filter_excel_by_topic(f'{file_name}.xlsx', topic, filtered_file_name)

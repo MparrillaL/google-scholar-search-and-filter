@@ -2,3 +2,5 @@ pandas
 openpyxl
 serpapi
 google-search-results
+datetime
+bs4

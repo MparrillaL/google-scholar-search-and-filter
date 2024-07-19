@@ -19,34 +19,3 @@ This project provides a tool that automates the search for academic articles on 
 1. Clone the repository:
    ```sh
    git clone https://github.com/MparrillaL/google-scholar-search-and-filter.git
-Navigate to the project directory:
-
-sh
-Copiar código
-cd google-scholar-search-and-filter
-Create and activate a virtual environment (optional but recommended):
-
-sh
-Copiar código
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-Install dependencies:
-
-sh
-Copiar código
-pip install -r requirements.txt
-Usage
-Run the main script:
-
-sh
-Copiar código
-python app.py
-In the graphical interface, enter your SerpApi key, search query, topic to filter by, keywords to search in the web pages, and desired year ranges.
-
-Click "Search and Filter" to get the results.
-
-Results will be saved to Excel files. The final file will be filtered based on the content of the linked web pages.
-
-Requirements
-Python 3.6 or higher
-Dependencies listed in requirements.txt
